@@ -27,37 +27,48 @@ struct Domain
 		, vel(velocity)
 	{
 		columns.resize(count);
+		for (Column& c : columns) {
+			c.height = 0.0f;
+		}
+	}
+
+	float getHeight(uint32_t i) const
+	{
+		return columns[i].height;
 	}
 
 	void update(float dt)
 	{
 		const int64_t count = columns.size() - 1;
 		const float v2 = vel * vel;
-		const float inv_width = 1.0f / width;
+		const float inv_width = 1.0f / (width * width);
+
+		const float k = -0.90f;
+		
 		for (int64_t i(1); i < count; ++i) {
-			const float f = v2 * (columns[i - 1].height + columns[i + 1].height - 2.0f * columns[i].height) * inv_width;
+			float f = v2 * (getHeight(i - 1) + getHeight(i + 1) - 2.0f * getHeight(i)) * inv_width;
+			f += k * columns[i].velocity;
 			columns[i].velocity = columns[i].velocity + f * dt;
-			columns[i].next_height = columns[i].height + columns[i].velocity * dt;
 		}
 
 		// First column
 		{
 			// Should be OK if more than 1 columns
-			const float f = v2 * (columns[0].height + columns[1].height - 2.0f * columns[0].height) * inv_width;
+			float f = v2 * (columns[0].height + columns[1].height - 2.0f * columns[0].height) * inv_width;
+			f += k * columns[0].velocity;
 			columns[0].velocity = columns[0].velocity + f * dt;
-			columns[0].next_height = columns[0].height + columns[0].velocity * dt;
 		}
 
 		// Last column
 		{
 			// Should be OK if more than 1 columns
-			const float f = v2 * (columns[count-1].height + columns[count].height - 2.0f * columns[count].height) * inv_width;
+			float f = v2 * (columns[count-1].height + columns[count].height - 2.0f * columns[count].height) * inv_width;
+			f += k * columns[count].velocity;
 			columns[count].velocity = columns[count].velocity + f * dt;
-			columns[count].next_height = columns[count].height + columns[count].velocity * dt;
 		}
 
 		for (Column& c : columns) {
-			c.height = c.next_height;
+			c.height += c.velocity;
 		}
 	}
 };

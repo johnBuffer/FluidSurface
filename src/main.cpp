@@ -10,10 +10,10 @@ int main()
 	constexpr uint32_t WinWidth = 1600;
 	constexpr uint32_t WinHeight = 900;
 
-	sf::RenderWindow window(sf::VideoMode(WinWidth, WinHeight), "GScript", sf::Style::Default, settings);
+	sf::RenderWindow window(sf::VideoMode(WinWidth, WinHeight), "FluidSurface", sf::Style::Default, settings);
 	window.setVerticalSyncEnabled(true);
 
-	Domain domain(80, 20, 10.5f);
+	Domain domain(200, 8, 70.0f);
 	
 	while (window.isOpen())
 	{
@@ -24,11 +24,19 @@ int main()
 				window.close();
 			}
 			else if (event.type == sf::Event::MouseButtonPressed) {
-				const float amount = 150.0f;
+				const float amount = 200.0f;
 				sf::Vector2i mouse_position = sf::Mouse::getPosition(window);
 				const uint64_t col = mouse_position.x / domain.width;
-				domain.columns[col].height += amount;
-				std::cout << domain.columns[col].height << std::endl;
+				const int32_t width = 20;
+				const uint32_t wave_width = 2 * width + 1;
+				const float PI = 3.14159f;
+				for (int32_t i(-width); i <= width; ++i) {
+					int32_t index = col + i;
+					if (index >= 0 && index < domain.columns.size()) {
+						const float ratio = i / float(wave_width);
+						domain.columns[index].height += 0.05f * amount * std::pow(cos(2.0f * ratio * PI), 8.0f) + 0.95f * amount * std::pow(cos(ratio * PI), 2.0f);
+					}
+				}
 			}
 			else if (event.type == sf::Event::MouseButtonReleased) {
 			}
