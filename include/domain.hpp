@@ -26,7 +26,7 @@ struct Domain
 		: width(column_width)
 		, vel(velocity)
 	{
-		columns.resize(width);
+		columns.resize(count);
 	}
 
 	void update(float dt)

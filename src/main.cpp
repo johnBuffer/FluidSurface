@@ -1,5 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include "domain.hpp"
+
 
 int main()
 {
@@ -10,6 +12,8 @@ int main()
 
 	sf::RenderWindow window(sf::VideoMode(WinWidth, WinHeight), "GScript", sf::Style::Default, settings);
 	window.setVerticalSyncEnabled(true);
+
+	Domain domain(80, 20, 10.5f);
 	
 	while (window.isOpen())
 	{
@@ -20,6 +24,11 @@ int main()
 				window.close();
 			}
 			else if (event.type == sf::Event::MouseButtonPressed) {
+				const float amount = 150.0f;
+				sf::Vector2i mouse_position = sf::Mouse::getPosition(window);
+				const uint64_t col = mouse_position.x / domain.width;
+				domain.columns[col].height += amount;
+				std::cout << domain.columns[col].height << std::endl;
 			}
 			else if (event.type == sf::Event::MouseButtonReleased) {
 			}
@@ -34,9 +43,20 @@ int main()
 			}
 		}
 
+		domain.update(0.008f);
 
 		window.clear();
 		
+		float x = 0.0f;
+		for (const Column& c : domain.columns) {
+			sf::RectangleShape r(sf::Vector2f(domain.width, c.height));
+			r.setFillColor(sf::Color::Blue);
+			r.setOrigin(0.0f, c.height);
+			r.setPosition(x, WinHeight);
+			window.draw(r);
+
+			x += domain.width;
+		}
 
 		window.display();
 	}
