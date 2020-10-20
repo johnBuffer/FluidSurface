@@ -69,25 +69,10 @@ int main()
 			}
 		}
 
-		/*domain.objects.back().x = mouse_position.x;
-		domain.objects.back().y = mouse_position.y;
-		domain.objects.back().vx = 0;
-		domain.objects.back().vy = 0;*/
-
 		domain.update(0.008f);
 
 		window.clear();
-		
-		for (const Particle& o : domain.particles) {
-			const float radius = 15.0f * o.getRatio();
-			sf::CircleShape circle(radius);
-			circle.setOrigin(radius, radius);
-			circle.setPosition(o.position);
-			circle.setFillColor(sf::Color(255 * o.getRatio(), 255 * o.getRatio(), 255, 255 - 255 * o.getRatio()));
-			//circle.setFillColor(sf::Color::Blue);
-			window.draw(circle);
-		}
-
+		// Drawing water
 		const uint64_t count = domain.columns.size() - 1;
 		sf::VertexArray va(sf::Quads, 4 * count);
 		for (uint32_t i(0); i < count; ++i) {
@@ -106,36 +91,27 @@ int main()
 		}
 		window.draw(va);
 
-		const float width = 20.0f;
+		const float height = 20.0f;
 		sf::VertexArray va_spec(sf::TriangleStrip, 2 * (count + 1));
+		// Initializing first element
 		va_spec[0].position = sf::Vector2f(0.0f, WinHeight - domain.columns[0].getHeight());
 		va_spec[0].color = sf::Color::Blue;
-		va_spec[1].position = sf::Vector2f(0.0f, WinHeight - domain.columns[0].getHeight() + width);
+		va_spec[1].position = sf::Vector2f(0.0f, WinHeight - domain.columns[0].getHeight() + height);
 		va_spec[1].color = sf::Color::Blue;
 		for (uint32_t i(1); i < count+1; ++i) {
 			uint32_t index = 2*i;
 			const Column& c = domain.columns[i];
-
 			va_spec[index + 0].position = sf::Vector2f(i * domain.width, WinHeight - c.getHeight());
+			// Compute slope
 			const sf::Vector2f v = va_spec[index].position - va_spec[index - 2].position;
 			const float length = sqrt(v.x*v.x + v.y*v.y);
 			const sf::Vector2f vec(v.x / length, v.y / length);
 			const sf::Vector2f normal(-vec.y, vec.x);
-
-			const float dot = std::abs(normal.x);// std::pow(std::max(0.0f, normal.x * sun_direction.x + normal.y * sun_direction.y), 4.0f);
-			va_spec[index + 1].position = va_spec[index + 0].position + normal * width * dot;
-
+			const float dot = std::pow(std::max(0.0f, normal.x * sun_direction.x + normal.y * sun_direction.y), 4.0f);
+			// Color
+			va_spec[index + 1].position = va_spec[index + 0].position + normal * height * dot;
 			va_spec[index + 0].color = sf::Color(dot * 255, dot * 255, 255);
 			va_spec[index + 1].color = sf::Color::Blue;
-
-			/*if (std::abs(normal.x) > 0.85f) {
-				for (uint32_t p_count(1); p_count--;) {
-					Particle p(getRandUnder(length * 0.03f));
-					p.position = va_spec[index + 0].position + getRandUnder(10.0f) * vec;
-					p.velocity = -(normal + sf::Vector2f(-0.5f + getRandUnder(1.0f), -0.5f + getRandUnder(1.0f))) * (length * 8.0f * (1.0f + getRandUnder(2.0f)));
-					domain.particles.push_back(p);
-				}
-			}*/
 		}
 		window.draw(va_spec);
 

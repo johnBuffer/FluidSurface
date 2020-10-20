@@ -114,7 +114,6 @@ struct Domain
 	float vel;
 	std::vector<Column> columns;
 	std::vector<Object> objects;
-	std::list<Particle> particles;
 
 	Domain(uint32_t count, float column_width, float velocity)
 		: width(column_width)
@@ -160,11 +159,6 @@ struct Domain
 		const int64_t count = columns.size() - 1;
 		const float v2 = vel * vel;
 		const float inv_width = 1.0f / (width * width);
-
-		for (Particle& p : particles) {
-			p.update(dt);
-		}
-		particles.remove_if([&](const Particle& p) {return p.isDone(); });
 
 		for (Object& o : objects) {
 			o.update(dt);
