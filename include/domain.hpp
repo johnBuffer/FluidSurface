@@ -27,7 +27,7 @@ struct Column
 
 	void setForce(float force)
 	{
-		const float k = .50f;
+		const float k = 0.70f;
 		f += force;
 		f -= velocity * k;
 	}
@@ -56,7 +56,7 @@ struct Object
 
 	void update(float dt)
 	{
-		const float gravity = 2500.0f;
+		const float gravity = 1500.0f;
 		vy += gravity * dt;
 
 		x += vx * dt;
@@ -147,11 +147,6 @@ struct Domain
 					const float moved = std::min(std::max(dy, 0.0f), 2.0f * height);
 					c.moved = moved;
 					o.vy -= moved / float(columns.size()) * width * 0.35f;
-
-					if (i > 0 && i < columns.size() - 1 && moved > 0.0f) {
-						const float vh = (c.height - columns[i - 1].height) + (c.height - columns[i + 1].height);
-						o.x += vh * 0.008f * width;
-					}
 				}
 			}
 

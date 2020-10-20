@@ -108,15 +108,15 @@ int main()
 
 		const float width = 20.0f;
 		sf::VertexArray va_spec(sf::TriangleStrip, 2 * (count + 1));
-		va_spec[0].position = sf::Vector2f(0.0f, WinHeight - domain.columns[0].height);
+		va_spec[0].position = sf::Vector2f(0.0f, WinHeight - domain.columns[0].getHeight());
 		va_spec[0].color = sf::Color::Blue;
-		va_spec[1].position = sf::Vector2f(0.0f, WinHeight - domain.columns[0].height + width);
+		va_spec[1].position = sf::Vector2f(0.0f, WinHeight - domain.columns[0].getHeight() + width);
 		va_spec[1].color = sf::Color::Blue;
 		for (uint32_t i(1); i < count+1; ++i) {
 			uint32_t index = 2*i;
 			const Column& c = domain.columns[i];
 
-			va_spec[index + 0].position = sf::Vector2f(i * domain.width, WinHeight - c.height);
+			va_spec[index + 0].position = sf::Vector2f(i * domain.width, WinHeight - c.getHeight());
 			const sf::Vector2f v = va_spec[index].position - va_spec[index - 2].position;
 			const float length = sqrt(v.x*v.x + v.y*v.y);
 			const sf::Vector2f vec(v.x / length, v.y / length);
