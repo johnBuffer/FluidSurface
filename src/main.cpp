@@ -43,13 +43,13 @@ int main()
 				if (event.mouseButton.button == sf::Mouse::Right) {
 					amount *= -1.0f;
 				}
-				const uint64_t col = mouse_position.x / domain.width;
-				const int32_t width = 30;
+				const uint64_t col = static_cast<uint64_t>(mouse_position.x / domain.width);
+				const int64_t width = 30;
 				const uint32_t wave_width = 2 * width + 1;
 				const float PI = 3.14159f;
-				for (int32_t i(-width); i <= width; ++i) {
-					int32_t index = col + i;
-					if (index >= 0 && index < domain.columns.size()) {
+				for (int64_t i(-width); i <= width; ++i) {
+					int64_t index = col + i;
+					if (index >= 0 && index < static_cast<int64_t>(domain.columns.size())) {
 						const float ratio = i / float(wave_width);
 						domain.columns[index].height += amount * std::pow(cos(ratio * PI), 3.0f);
 						
@@ -110,7 +110,7 @@ int main()
 			const float dot = std::pow(std::max(0.0f, normal.x * sun_direction.x + normal.y * sun_direction.y), 4.0f);
 			// Color
 			va_spec[index + 1].position = va_spec[index + 0].position + normal * height * dot;
-			va_spec[index + 0].color = sf::Color(dot * 255, dot * 255, 255);
+			va_spec[index + 0].color = sf::Color(static_cast<uint8_t>(dot * 255), static_cast<uint8_t>(dot * 255), 255);
 			va_spec[index + 1].color = sf::Color::Blue;
 		}
 		window.draw(va_spec);

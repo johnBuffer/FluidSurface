@@ -125,7 +125,7 @@ struct Domain
 		}
 	}
 
-	float getHeight(uint32_t i) const
+	float getHeight(uint64_t i) const
 	{
 		return columns[i].getHeight();
 	}
