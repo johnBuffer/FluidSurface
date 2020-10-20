@@ -3,6 +3,12 @@
 #include "domain.hpp"
 
 
+float getRandUnder(float upper)
+{
+	return (rand() % 1000) * 0.001f * upper;
+}
+
+
 int main()
 {
 	sf::ContextSettings settings;
@@ -13,10 +19,11 @@ int main()
 	sf::RenderWindow window(sf::VideoMode(WinWidth, WinHeight), "FluidSurface", sf::Style::Fullscreen, settings);
 	window.setVerticalSyncEnabled(true);
 
-	Domain domain(192, 11, 800.0f);
+	Domain domain(192, 11, 700);
 
-	//domain.objects.emplace_back();
-	//domain.objects.back().radius = 150.0f;
+	domain.objects.emplace_back();
+	domain.objects.back().radius = 150.0f;
+	domain.objects.back().x = WinWidth * 0.5f;
 
 	const float normalizer = 1.0f / sqrt(2.0f);
 	const sf::Vector2f sun_direction(-1.0f * normalizer, 1.0f * normalizer);
@@ -45,7 +52,7 @@ int main()
 					if (index >= 0 && index < domain.columns.size()) {
 						const float ratio = i / float(wave_width);
 						domain.columns[index].height += amount * std::pow(cos(ratio * PI), 3.0f);
-						domain.columns[index].height += 0.025f * amount * std::pow(cos(4.0f * ratio * PI), 3.0f);
+						
 					}
 				}
 			}
@@ -62,10 +69,25 @@ int main()
 			}
 		}
 
+		/*domain.objects.back().x = mouse_position.x;
+		domain.objects.back().y = mouse_position.y;
+		domain.objects.back().vx = 0;
+		domain.objects.back().vy = 0;*/
+
 		domain.update(0.008f);
 
 		window.clear();
 		
+		for (const Particle& o : domain.particles) {
+			const float radius = 15.0f * o.getRatio();
+			sf::CircleShape circle(radius);
+			circle.setOrigin(radius, radius);
+			circle.setPosition(o.position);
+			circle.setFillColor(sf::Color(255 * o.getRatio(), 255 * o.getRatio(), 255, 255 - 255 * o.getRatio()));
+			//circle.setFillColor(sf::Color::Blue);
+			window.draw(circle);
+		}
+
 		const uint64_t count = domain.columns.size() - 1;
 		sf::VertexArray va(sf::Quads, 4 * count);
 		for (uint32_t i(0); i < count; ++i) {
@@ -73,14 +95,14 @@ int main()
 			const Column& c = domain.columns[i];
 			const Column& next_c = domain.columns[i+1];
 			va[index + 0].position = sf::Vector2f(i * domain.width, WinHeight);
-			va[index + 1].position = sf::Vector2f(i * domain.width, WinHeight - c.height);
-			va[index + 2].position = sf::Vector2f((i + 1) * domain.width, WinHeight - next_c.height);
+			va[index + 1].position = sf::Vector2f(i * domain.width, WinHeight - c.getHeight());
+			va[index + 2].position = sf::Vector2f((i + 1) * domain.width, WinHeight - next_c.getHeight());
 			va[index + 3].position = sf::Vector2f((i + 1) * domain.width, WinHeight);
-
-			va[index + 0].color = sf::Color::Blue;
-			va[index + 1].color = sf::Color::Blue;
-			va[index + 2].color = sf::Color::Blue;
-			va[index + 3].color = sf::Color::Blue;
+			sf::Color color = sf::Color::Blue;
+			va[index + 0].color = color;
+			va[index + 1].color = color;
+			va[index + 2].color = color;
+			va[index + 3].color = color;
 		}
 		window.draw(va);
 
@@ -97,12 +119,23 @@ int main()
 			va_spec[index + 0].position = sf::Vector2f(i * domain.width, WinHeight - c.height);
 			const sf::Vector2f v = va_spec[index].position - va_spec[index - 2].position;
 			const float length = sqrt(v.x*v.x + v.y*v.y);
-			const sf::Vector2f normal(-v.y / length, v.x / length);
-			const float dot = std::pow(std::max(0.0f, normal.x * sun_direction.x + normal.y * sun_direction.y), 4.0f);
+			const sf::Vector2f vec(v.x / length, v.y / length);
+			const sf::Vector2f normal(-vec.y, vec.x);
+
+			const float dot = std::abs(normal.x);// std::pow(std::max(0.0f, normal.x * sun_direction.x + normal.y * sun_direction.y), 4.0f);
 			va_spec[index + 1].position = va_spec[index + 0].position + normal * width * dot;
 
 			va_spec[index + 0].color = sf::Color(dot * 255, dot * 255, 255);
 			va_spec[index + 1].color = sf::Color::Blue;
+
+			/*if (std::abs(normal.x) > 0.85f) {
+				for (uint32_t p_count(1); p_count--;) {
+					Particle p(getRandUnder(length * 0.03f));
+					p.position = va_spec[index + 0].position + getRandUnder(10.0f) * vec;
+					p.velocity = -(normal + sf::Vector2f(-0.5f + getRandUnder(1.0f), -0.5f + getRandUnder(1.0f))) * (length * 8.0f * (1.0f + getRandUnder(2.0f)));
+					domain.particles.push_back(p);
+				}
+			}*/
 		}
 		window.draw(va_spec);
 
@@ -110,7 +143,7 @@ int main()
 			sf::CircleShape circle(o.radius);
 			circle.setOrigin(o.radius, o.radius);
 			circle.setPosition(o.x, o.y);
-			circle.setFillColor(sf::Color(255, 255, 0, 128));
+			circle.setFillColor(sf::Color(255, 255, 0));
 			window.draw(circle);
 		}
 
